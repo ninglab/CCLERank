@@ -1,0 +1,154 @@
+-------------------------------------------------------------------
+pLETORg
+Last modify: 05/07/2018
+Author: Junfeng Liu
+-------------------------------------------------------------------
+
+
+--------------------------------------------
+General information
+--------------------------------------------
+	This code provides the pLETORg algorithm for the usage of
+	"Drug Selection via Joint Push and Learning to Rank".
+
+--------------------------------------------
+Iuput files
+--------------------------------------------
+	The required input files include:
+		- cell line - drug response matrix file
+                - cell line similarity matrix file
+		- sensitive threshold file
+	
+	The cell line - drug response matrix file should be formatted as follows:
+		- Each row represents a cell line.
+		- Each column represents a drug (fields separated by commas).
+		- The values in the matrix represent the response value of a certain drug on a certain cell line. 
+			- Lower AUC value means a drug is more sensitive, thus the drug should be ranked higher.
+			- Missing values are represented by "nan".
+			- If a sensitivity score is 0 in training/testing file, it means this score is held out for testing/training, and the score could be found in the corresponding testing/training file. Such 0 scores will not be used for training/testing.
+
+
+		- Example:
+			"0.2,2.5,1.7,nan"
+			"nan,0.4,2.5,0.9"
+			"0.3,3.2,nan,nan"
+
+	The cell line similarity matrix file should be formatted as follows:
+                - Each row/column represents a cell line.
+		- The values in the matrix represent the similarity between two cell lines.
+		- The order of the cell lines should be the same as that in the cell line - drug response matrix file.
+		- Example:
+                        "0.1,0.6,0.7,0.9"
+                        "0.8,0.4,0.5,0.2"
+                        "0.7,0.2,0.5,0.6"
+
+	The sensitive threshold file should be formatted as follows:
+		- There is one column in the file.
+		- Each row represents a cell line.
+		- The value in each row represents a drug is sensitive if the drug response is smaller than this value
+
+
+--------------------------------------------
+Output files
+--------------------------------------------
+	There are four output files:
+		- train_U_file
+		- train_V_file
+		- pred_file
+
+	train_U_file:
+		- The train_U_file contains the cell line latent vectors.
+		- Each row represents a cell line.
+		- Each column represents a latent dimension (fields separated by commas).
+
+        train_V_file:
+		- The train_V_file contains the drug latent vectors.
+		- Each row represents a laten dimension.
+		- Each column represents a drug (fields separated by commas).
+
+	pred_file:
+		- The pred_file contains the predicted ranking scores of drugs in cell lines.
+		- Higher ranking score means a drug is ranked higher in a cell line (different from cell line - drug response matrix file).
+		- Other formats of pred_file are the same as in cell line - drug response matrix file.
+
+
+
+--------------------------------------------
+Usage
+--------------------------------------------
+	Please download all files in the code directory, including all *.py files.
+
+	- Train a model and make a prediction:
+		- Command:
+			python pncr.py [-parameter_name parameter]
+		
+		- Parameters: all parameters are required unless stated. The parameters include:
+			- train_file: (string) path to the training cell line - drug response matrix file.
+			- sim_file: (string) path to the cell line similarity matrix file.
+			- rel_file: (string) path to the cell line sensitive threshold file.
+			- max_iter: (int) number of maximum iterations for training.
+			- d: (int) number of latent dimensions.
+			- learning_rate: (float) learning rate for gradient descent method.
+			- tol: (float) percentage difference of losses between iterations for early stop.
+			- alpha: (float) weight on push term.
+			- beta: (float) weight on U/V regularizer.
+			- gamma: (float) weight on U similarity regularizer.
+			- train_U_file: (string) file path to output cell line latent vectors.
+			- train_V_file: (string) file path to output drug latent vectors.
+			- pred_file: (string) file path to output predicted ranking scores of drugs in cell lines.
+
+		
+		- Example:
+			python pncr.py	-train_file train.txt \
+					-rel_file rel.txt \
+					-sim_file sim.txt \
+					-max_iter 1000 \
+					-d 30 \
+					-learning_rate 0.01 \
+					-tol 0.001 \
+					-alpha 0.5 \
+					-beta 1.0 \
+					-gamma 1.0 \
+					-train_U_file U.txt \
+					-train_V_file V.txt \
+					-pred_file pred.txt
+
+
+	- Evaluate the predictions:
+                - Command:
+                        python evaluate.py [-parameter_name parameter]
+
+                - Parameters: all parameters are required unless stated. The parameters include:
+                        - test_file: (string) path to the test cell line - drug response matrix file.
+                        - rel_file: (string) path to the cell line sensitive threshold file.
+                        - pred_file: (string) file path to the predicted ranking scores of drugs in cell lines.
+			- eval_file: (string) file path to save the evaluation scores.
+
+		- Example:
+			python evaluate.py	-test_file test.txt \
+						-rel_file rel.txt \
+						-pred_file pred.txt \
+						-eval_file eval.txt
+
+
+--------------------------------------------
+Comments and Bug Reports
+--------------------------------------------
+Any kind of comments, suggestions, or bug reports are welcome and appreciated.
+Please feel free to contact the author: liujunf AT iupui DOT edu.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
